@@ -1,0 +1,52 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_MODEL: "smollm2:135m-instruct-q4_1"
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    entrypoint: ["/bin/sh"]
+    command:
+      - "-c"
+      - "ollama serve & sleep 2; ollama pull smollm2:135m-instruct-q4_1; wait"
+        
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      APP_NAME: "Chatbot Fact Checker"
+      REDIS_URL: "redis://redis:6379/0"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "smollm2:135m-instruct-q4_1"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - ollama
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      BACKEND_PROXY_TARGET: "http://backend:8000"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  ollama:    

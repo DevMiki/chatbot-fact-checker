@@ -1,0 +1,19 @@
+[project]
+name = "chatbot-fact-checker-backend"
+version = "0.1.0"
+description = "FastAPI backend for chatbot fact checker MVP"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.110.1",
+    "uvicorn[standard]==0.29.0",
+    "python-multipart==0.0.9",
+    "pydantic-settings==2.2.1",
+    "redis==5.0.1",
+    "reportlab==4.0.9",
+    "pypdf==3.17.4",
+    "httpx==0.27.2",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
