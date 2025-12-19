@@ -6,6 +6,18 @@ Upload PDFs, ask a question, get probably a crazy answer from the LLM (if availa
 
 ---
 
+## Getting Started
+- Fastest path Windows: 
+```bash
+git clone https://github.com/DevMiki/chatbot-fact-checker.git; cd chatbot-fact-checker; docker-compose up
+```
+
+- Fastest path Linux: 
+```bash
+git clone https://github.com/DevMiki/chatbot-fact-checker.git && cd chatbot-fact-checker && docker-compose up
+```
+
+
 ## Tech stack
 
 - **Backend:** FastAPI (Python 3.11), `httpx` for Ollama calls, `uv` for dependency sync
@@ -112,7 +124,3 @@ npm run dev -- --host --port 5173
 
 ## Troubleshooting
 - Common issues and fixes: `docs/troubleshooting.md` (ports, proxy config, Redis down, CORS, stale Docker builds).
-
-## Getting Started
-- Fastest path Windows: `git clone https://github.com/DevMiki/chatbot-fact-checker.git; cd chatbot-fact-checker; docker-compose up -d`
-- Fastest path Linux: `git clone https://github.com/DevMiki/chatbot-fact-checker.git && cd chatbot-fact-checker && docker-compose up -d`
