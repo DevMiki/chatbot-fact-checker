@@ -9,18 +9,6 @@ FILE_ID_SEPARATOR = "__"
 def build_file_id(source: str, filename: str) -> str:
     return f"{source}{FILE_ID_SEPARATOR}{filename}"
 
-
-def parse_file_id(file_id: str) -> tuple[str, str]:
-    if not file_id or FILE_ID_SEPARATOR not in file_id:
-        raise HTTPException(status_code=400, detail="Invalid file id")
-    source, filename = file_id.split(FILE_ID_SEPARATOR, 1)
-    if source not in ALLOWED_SOURCES:
-        raise HTTPException(status_code=400, detail="Invalid file id")
-    if not _is_safe_filename(filename):
-        raise HTTPException(status_code=400, detail="Invalid file id")
-    return source, filename
-
-
 def _is_safe_filename(filename: str) -> bool:
     if not filename:
         return False
@@ -32,6 +20,15 @@ def _is_safe_filename(filename: str) -> bool:
         return False
     return True
 
+def parse_file_id(file_id: str) -> tuple[str, str]:
+    if not file_id or FILE_ID_SEPARATOR not in file_id:
+        raise HTTPException(status_code=400, detail="Invalid file id")
+    source, filename = file_id.split(FILE_ID_SEPARATOR, 1)
+    if source not in ALLOWED_SOURCES:
+        raise HTTPException(status_code=400, detail="Invalid file id")
+    if not _is_safe_filename(filename):
+        raise HTTPException(status_code=400, detail="Invalid file id")
+    return source, filename
 
 class FileResolver:
 
@@ -41,6 +38,7 @@ class FileResolver:
 
     def resolve(self, file_id: str) -> Path:
         source, filename = parse_file_id(file_id)
+        print(file_id)
         base_dir = self.upload_dir if source == "uploaded" else self.system_files_dir
         base_dir = base_dir.resolve()
         candidate = (base_dir / filename).resolve()

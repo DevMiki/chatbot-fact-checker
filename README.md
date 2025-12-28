@@ -118,7 +118,7 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 npm i
-npm run dev -- --host --port 5173
+npm run dev
 ```
 - Dev proxy sends `/api` to `BACKEND_PROXY_TARGET` (default `http://127.0.0.1:8000`). Adjust if your backend runs elsewhere.
 
