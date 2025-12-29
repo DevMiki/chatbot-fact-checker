@@ -59,9 +59,7 @@ async def validate_upload(file: UploadFile) -> tuple[str, bytes]:
     return filename, content
 
 
-async def _read_with_limit(
-    file: UploadFile, max_bytes: int, chunk_size: int = 1024 * 1024
-):
+async def _read_with_limit(file: UploadFile, max_bytes: int, chunk_size: int = 1024 * 1024):
     total = 0
     parts: list[bytes] = []
 

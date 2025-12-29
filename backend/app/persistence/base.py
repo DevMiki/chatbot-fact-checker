@@ -5,12 +5,13 @@ from ..types import FileRef, UploadedFile
 
 class FileRepository(ABC):
     @abstractmethod
-    async def persist_uploads(self, uploads: list[UploadedFile]) -> None: ...
+    async def persist_uploads(self, uploaded_files: list[UploadedFile]) -> None: ...
 
     @abstractmethod
-    async def fingerprint(self) -> str: ...
+    async def get_files_fingerprint(self) -> str: ...
 
     @abstractmethod
     async def related_files_from_memory(
-        self, question: str,
+        self,
+        question: str,
     ) -> list[FileRef]: ...

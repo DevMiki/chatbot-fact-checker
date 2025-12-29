@@ -1,6 +1,6 @@
 import os
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _default_ollama_base_url() -> str:
@@ -18,10 +18,7 @@ class Settings(BaseSettings):
     redis_url: str | None = "redis://redis:6379/0"
     ollama_base_url: str = _default_ollama_base_url()
     ollama_model: str = "smollm2:135m-instruct-q4_1"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file = ".env", env_file_encoding = "utf-8")
 
 
 settings = Settings()

@@ -15,11 +15,7 @@ router = APIRouter()
 cache = get_cache()
 system_files_manager = SystemFileManager(base_dir=settings.system_files_dir)
 file_repository = get_file_repository()
-chat_service = ChatService(
-    cache=cache,
-    system_files=system_files_manager,
-    document_repo=file_repository,
-)
+chat_service = ChatService(cache, system_files_manager, file_repository)
 
 
 def parse_form_bool(value: Optional[str], default: bool = True) -> bool:

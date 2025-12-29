@@ -46,17 +46,17 @@ class ChatService:
 
         stripped_question_text = self._validate_question(question)
         await self.document_repo.persist_uploads(uploaded_files)
-        file_memory_fingerprint = await self.document_repo.fingerprint()
-        cache_key = self._build_cache_key(
-            stripped_question_text, uploaded_files, file_memory_fingerprint, use_llm
-        )
+        files_memory_fingerprint = await self.document_repo.get_files_fingerprint()
+        cache_key = self._build_cache_key(stripped_question_text, uploaded_files, files_memory_fingerprint, use_llm)
 
         cached_response = await self._get_cached_response(cache_key)
         if cached_response:
             return cached_response
 
         answer = (
-            await self._ask_llm_model(stripped_question_text) if use_llm else self._pick_mock_answer()
+            await self._ask_llm_model(stripped_question_text)
+            if use_llm
+            else self._pick_mock_answer()
         )
         file_refs = await self._collect_file_references(stripped_question_text)
 
@@ -73,15 +73,13 @@ class ChatService:
         self,
         question: str,
         uploaded_files: List[UploadedFile],
-        memory_fingerprint: str,
+        files_memory_fingerprint: str,
         use_llm: bool,
     ) -> str:
         mode = "llm" if use_llm else "mock"
         file_hashes = sorted(file.file_hash for file in uploaded_files)
         joined_hashes = "|".join(file_hashes)
-        return (
-            sha256_hex(f"mode:{mode}|q:{question.lower()}|files:{joined_hashes}|mem:{memory_fingerprint}")
-        )
+        return sha256_hex(f"mode:{mode}|q:{question.lower()}|files:{joined_hashes}|mem:{files_memory_fingerprint}")
 
     async def _get_cached_response(self, cache_key: str) -> Optional[ChatResponse]:
         cached_chat_response = await self.cache.get(cache_key)
