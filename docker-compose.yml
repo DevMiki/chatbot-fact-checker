@@ -27,10 +27,9 @@ services:
   backend:
     build:
       context: ./backend
+    env_file:
+      - ./backend/.env
     environment:
-      APP_NAME: "Chatbot Fact Checker"
-      REDIS_URL: "redis://redis:6379/0"
-      OLLAMA_BASE_URL: "http://ollama:11434"
       OLLAMA_MODEL: "smollm2:135m-instruct-q4_1"
     ports:
       - "8000:8000"
