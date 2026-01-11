@@ -18,6 +18,7 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    container_name: local-minio
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -27,12 +28,29 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 5s
+
+  minio_init:
+    image: minio/mc:RELEASE.2024-11-05T11-29-45Z
+    container_name: local-minio-init
+    depends_on:
+      - minio
+    environment:
+      MC_HOST_local: http://minioadmin:minioadmin@minio:9000
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eux
+
+        echo "Waiting for MinIO to be reachable..."
+        until mc ls local >/dev/null 2>&1; do
+          sleep 1
+        done
+
+        mc mb --ignore-existing local/chatbot-bucket
+        echo "MinIO bucket ensured: chatbot-bucket"
+        mc ls local
+    restart: "no"
 
   redis:
     image: redis:7-alpine

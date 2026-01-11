@@ -23,4 +23,3 @@ class UploadedFileRecord(Base):
     stored_path: Mapped[str] = mapped_column(String(512), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     extracted_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    extracted_text_special: Mapped[str | None] = mapped_column(Text, nullable=True)
