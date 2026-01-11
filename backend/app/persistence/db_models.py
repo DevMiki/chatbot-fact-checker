@@ -15,7 +15,7 @@ class UploadedFileRecord(Base):
         CheckConstraint("source IN ('uploaded', 'system')", name="ck_uploaded_files_source_allowed")
         )
     
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), unique=True, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     source: Mapped[Literal["uploaded", "system"]] = mapped_column(String(16), nullable=False)
     file_id: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -23,4 +23,4 @@ class UploadedFileRecord(Base):
     stored_path: Mapped[str] = mapped_column(String(512), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     extracted_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+    extracted_text_special: Mapped[str | None] = mapped_column(Text, nullable=True)
