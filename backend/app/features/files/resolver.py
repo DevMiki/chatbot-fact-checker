@@ -23,7 +23,9 @@ def _is_safe_filename(filename: str) -> bool:
 def parse_file_id(file_id: str) -> tuple[str, str]:
     if not file_id or FILE_ID_SEPARATOR not in file_id:
         raise HTTPException(status_code=400, detail="Invalid file id")
+
     source, filename = file_id.split(FILE_ID_SEPARATOR, 1)
+
     if source not in ALLOWED_SOURCES:
         raise HTTPException(status_code=400, detail="Invalid file id")
     if not _is_safe_filename(filename):
@@ -38,11 +40,13 @@ class FileResolver:
 
     def resolve(self, file_id: str) -> Path:
         source, filename = parse_file_id(file_id)
-        print(file_id)
-        base_dir = self.upload_dir if source == "uploaded" else self.system_files_dir
+        base_dir = self.system_files_dir
         base_dir = base_dir.resolve()
         candidate = (base_dir / filename).resolve()
-        if base_dir not in candidate.parents and candidate != base_dir:
+
+        is_inside = base_dir in candidate.parents
+        is_exact = candidate == base_dir
+        if not is_inside and not is_exact:
             raise HTTPException(status_code=400, detail="Invalid file id")
         if not candidate.exists() or not candidate.is_file():
             raise HTTPException(status_code=404, detail="File not found")

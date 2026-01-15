@@ -36,11 +36,20 @@ class MinioObjectStorage:
             content_type="application/pdf",
         )
 
+    def get_pdf_bytes(self, object_name: str) -> bytes:
+        response = self._client.get_object(self._bucket, object_name)
+        try:
+            return response.read()
+        finally:
+            response.close()
+            response.release_conn()
+
 
 def _require(value: str | None, env_name: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required setting: {env_name}")
     return value
+
 
 @lru_cache
 def get_minio_object_storage() -> MinioObjectStorage:
