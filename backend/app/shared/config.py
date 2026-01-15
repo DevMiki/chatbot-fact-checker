@@ -11,6 +11,11 @@ def _default_ollama_base_url() -> str:
         return "http://ollama:11434"
     return "http://localhost:11434"
 
+def _default_object_storage_url() -> str:
+    if os.path.exists("/.dockerenv"):
+        return "minio:9000"
+    return "localhost:9000"
+
 
 class Settings(BaseSettings):
 
@@ -28,10 +33,10 @@ class Settings(BaseSettings):
     ollama_base_url: str = Field(default_factory=_default_ollama_base_url)
     ollama_model: str = Field(...,alias="OLLAMA_MODEL")
     database_url: str = Field(...,alias="DATABASE_URL")
-    minio_endpoint: str | None = None
-    minio_access_key: str | None = None
-    minio_secret_key: str | None = None
-    minio_bucket: str | None = None
+    minio_endpoint: str | None = Field(default_factory=_default_object_storage_url)
+    minio_access_key: str | None = Field(...,alias="MINIO_ACCESS_KEY")
+    minio_secret_key: str | None = Field(...,alias="MINIO_SECRET_KEY")
+    minio_bucket: str | None = Field(...,alias="MINIO_BUCKET")
     minio_secure: bool = False
 
 

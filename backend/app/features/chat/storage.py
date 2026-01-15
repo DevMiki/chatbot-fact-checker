@@ -1,4 +1,3 @@
-import hashlib
 import re
 import uuid
 from datetime import datetime
@@ -7,10 +6,12 @@ from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 from pypdf import PdfReader
+from starlette.concurrency import run_in_threadpool
 
-from app.shared.crypto import sha256_hex
+from ...shared.crypto import sha256_hex
 
 from ...shared.config import settings
+from ...shared.object_storage import MinioObjectStorage
 from ...types import FileRef, UploadedFile
 from ..files.resolver import build_file_id
 
@@ -24,17 +25,16 @@ def ensure_storage_dirs() -> None:
     Path(settings.system_files_dir).mkdir(parents=True, exist_ok=True)
 
 
-async def persist_uploaded_pdf(file: UploadFile) -> UploadedFile:
+async def persist_uploaded_pdf(file: UploadFile, object_storage: MinioObjectStorage) -> UploadedFile:
     filename, file_byte_content = await validate_upload(file)
 
-    upload_path = _build_upload_storage_path(filename)
-    _write_file(upload_path, file_byte_content)
-
-    file_id = build_file_id("uploaded", upload_path.name)
+    upload_name = _build_upload_storage_name(filename)
+    await run_in_threadpool(object_storage.put_pdf, upload_name, file_byte_content)
+    file_id = build_file_id("uploaded", upload_name)
     file_ref = FileRef(filename, "uploaded", file_id)
     file_hash = sha256_hex(file_byte_content)
     extracted_text = _extract_file_text(file_byte_content)
-    return UploadedFile(file_ref, file_hash, extracted_text, str(upload_path))
+    return UploadedFile(file_ref, file_hash, extracted_text, str(upload_name))
 
 
 async def validate_upload(file: UploadFile) -> tuple[str, bytes]:
@@ -86,12 +86,9 @@ def _is_allowed_mime(content_type) -> bool:
     return mime in ALLOWED_MIME_TYPES
 
 
-def _build_upload_storage_path(original_filename: str) -> Path:
+def _build_upload_storage_name(original_filename: str) -> str:
     safe_name = sanitize_filename(original_filename)
-    unique_name = f"{uuid.uuid4().hex}_{safe_name}"
-    upload_dir = Path(settings.upload_dir)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    return upload_dir / unique_name
+    return f"{uuid.uuid4().hex}_{safe_name}"
 
 
 def sanitize_filename(filename: str) -> str:
@@ -106,7 +103,7 @@ def _write_file(upload_path: Path, content: bytes) -> None:
 
 
 def _extract_file_text(
-    file_bytes: bytes, max_pages: int = 5, max_chars: int = 10_000
+        file_bytes: bytes, max_pages: int = 5, max_chars: int = 10_000
 ) -> str:
     try:
         reader = PdfReader(BytesIO(file_bytes))

@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from fastapi import HTTPException
 
-from app.shared.crypto import sha256_hex
+from ...shared.crypto import sha256_hex
 
 from ..llm.service import LlmUnavailableError, ask_llm
 from ...shared.config import settings
